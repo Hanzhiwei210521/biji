@@ -84,6 +84,7 @@ Restart cobblerd and then run 'cobbler sync' to apply changes.
     </pre>
 * [root@linux-node1 ~]# yum install cman fence-agents -y
 * [root@linux-node1 ~]# systemctl restart cobblerd
+
 ###修改cobbler的dhcp模块，用cobbler管理dhcp服务
 * [root@linux-node1 ~]# vi /etc/cobbler/dhcp.template
 
