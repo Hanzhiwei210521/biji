@@ -99,6 +99,7 @@ Restart cobblerd and then run 'cobbler sync' to apply changes.
     </pre>
 * [root@linux-node1 ~]# systemctl restart xinetd
 * [root@linux-node1 ~]# systemctl restart cobblerd
+
 ###同步最新cobbler配置，可以看具体做了哪些操作
 * [root@linux-node1 ~]# cobbler sync  
   
@@ -146,6 +147,7 @@ running shell triggers from /var/lib/cobbler/triggers/change/*
 
 ###导入ks.cfg文件
 * [root@linux-node1 ~]# cobbler profile edit --name=CentOS-7-X86\_64 --kickstart=/var/lib/cobbler/kickstarts/CentOS-7-x86_64.cfg
+
 ###更改内核参数，统一网卡名称
 * [root@linux-node1 ~]# cobbler profile edit --name=CentOS-7-x86_64 --kopts='net.ifnames=0 biosdevname=0'
 
