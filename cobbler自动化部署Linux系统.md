@@ -155,6 +155,7 @@ running shell triggers from /var/lib/cobbler/triggers/change/*
 ###同步cobbler配置
 * [root@linux-node1 ~]# cobbler sync 
 ###部署操作系统
+
 新建一台虚拟机，通过网络启动
 ![](https://raw.githubusercontent.com/Hanzhiwei210521/loading/master/image/image001.png)
 
