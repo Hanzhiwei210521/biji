@@ -232,3 +232,7 @@ $yum_config_stanza
 [root@linux-node1 ~]# echo "1 3 * * * /usr/bin/cobbler reposync --tries=3 --no-fail" >>/var/spool/cron/root
 </pre>
 
+###附件
+* [CentOS-6.6-X86_64](https://raw.githubusercontent.com/Hanzhiwei210521/loading/master/image/CentOS-6.6-x86_64.cfg)
+* [CentOS-7-x86_64](https://raw.githubusercontent.com/Hanzhiwei210521/loading/master/image/CentOS-7-x86_64.cfg)
+
