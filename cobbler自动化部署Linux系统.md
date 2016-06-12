@@ -218,7 +218,7 @@ MENU TITLE Cobbler | https://github.com/Hanzhiwei210521
 </pre>
 * 添加repo到对应profile项目中
 <pre>
-[root@linux-node1 ~]# cobbler profile edit --name=Centos-7-x86_64  --repos=http://mirrors.aliyun.com/centos/7.2.1511/cloud/x86_64/openstack-mitaka/ 
+[root@linux-node1 ~]# cobbler profile edit --name=Centos-7-x86_64  --repos="openstack-mitaka" 
 </pre>
 * 修改ks.cfg文件
 <pre>
