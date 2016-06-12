@@ -1,39 +1,39 @@
 # cobbler自动化部署Linux系统 #
 
 ###基础环境准备
-###系统版本
+#####系统版本
 
     [root@linux-node1 ~]# cat /etc/redhat-release   
     CentOS Linux release 7.2.1511 (Core)
-###内核版本
+#####内核版本
    
     [root@linux-node1 ~]# uname -r
     3.10.0-327.18.2.el7.x86_64
-###检查selinux是否关闭
+#####检查selinux是否关闭
 
     [root@linux-node1 ~]# getenforce 
     Disabled
-###关闭防火墙
+#####关闭防火墙
 
     [root@linux-node1 ~]# systemctl stop firewalld
     [root@linux-node1 ~]# systemctl disable firewalld.service
-###本机IP
+#####本机IP
 <pre>
 [root@linux-node1 ~]# ifconfig eth0|awk 'NR==2{print $2}'
 192.168.56.11
 </pre>
-###主机名
+#####主机名
 <pre>
 [root@linux-node1 ~]# hostname
 linux-node1.example.com
 </pre>
-###安装epel源
-<pre>
-[root@linux-node1 ~]# wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo 
-</pre> 
 提示：
 虚拟机网卡要采用NAT模式，因为我们会搭建DHCP服务器，在同一局域网多个DHCP服务会有冲突，并且导致实验失败。
 ###一、安装cobbler
+#####安装epel源
+<pre>
+[root@linux-node1 ~]# wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo 
+</pre> 
 ####安装服务包
 <pre>
 [root@linux-node1 ~]# yum install cobbler cobbler-web pykickstart httpd dhcp xinetd -y
@@ -177,7 +177,7 @@ running shell triggers from /var/lib/cobbler/triggers/change/*
 ####指定要重装的系统
 * [root@localhost ~]# koan --replace-self --server=192.168.56.11 --profile=CentOS-6.6-x86_64
 * [root@localhost ~]# reboot
-* 
+ 
 ###三、定制化安装
 
 cobbler支持设备的物理MAC地址区分设备，针对不同的设备安装操作系统
@@ -209,26 +209,26 @@ MENU TITLE Cobbler | https://github.com/Hanzhiwei210521
 ![](https://raw.githubusercontent.com/Hanzhiwei210521/loading/master/image/image003.png)
 ###五、cobbler定制私有仓库
 * 添加repo
-    <pre>
+<pre>
 [root@linux-node1 ~]# cobbler repo add --name=openstack-mitaka --mirror=http://mirrors.aliyun.com/centos/7.2.1511/cloud/x86_64/openstack-mitaka/ --arch=x86_64 --breed=yum
 </pre>
 * 同步repo 
-    <pre>
+<pre>
 [root@linux-node1 ~]# cobbler reposync
 </pre>
 * 添加repo到对应profile项目中
-    <pre>
+<pre>
 [root@linux-node1 ~]# cobbler profile edit --name=Centos-7-x86_64  --repos=http://mirrors.aliyun.com/centos/7.2.1511/cloud/x86_64/openstack-mitaka/ 
 </pre>
 * 修改ks.cfg文件
-    <pre>
+<pre>
 %post
 systemctl disable postfix.service
 $yum_config_stanza
 %end
 </pre>
 * 添加定时任务，定期同步repo
-    <pre>
+<pre>
 [root@linux-node1 ~]# echo "1 3 * * * /usr/bin/cobbler reposync --tries=3 --no-fail" >>/var/spool/cron/root
 </pre>
 
