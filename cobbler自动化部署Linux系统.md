@@ -177,7 +177,9 @@ running shell triggers from /var/lib/cobbler/triggers/change/*
 ####指定要重装的系统
 * [root@localhost ~]# koan --replace-self --server=192.168.56.11 --profile=CentOS-6.6-x86_64
 * [root@localhost ~]# reboot
+* 
 ###三、定制化安装
+
 cobbler支持设备的物理MAC地址区分设备，针对不同的设备安装操作系统
 
 查看虚拟机的MAC地址
@@ -207,27 +209,26 @@ MENU TITLE Cobbler | https://github.com/Hanzhiwei210521
 ![](https://raw.githubusercontent.com/Hanzhiwei210521/loading/master/image/image003.png)
 ###五、cobbler定制私有仓库
 * 添加repo
-<pre>
+    <pre>
 [root@linux-node1 ~]# cobbler repo add --name=openstack-mitaka --mirror=http://mirrors.aliyun.com/centos/7.2.1511/cloud/x86_64/openstack-mitaka/ --arch=x86_64 --breed=yum
 </pre>
-同步repo 
-<pre>
+* 同步repo 
+    <pre>
 [root@linux-node1 ~]# cobbler reposync
 </pre>
 * 添加repo到对应profile项目中
-<pre>
+    <pre>
 [root@linux-node1 ~]# cobbler profile edit --name=Centos-7-x86_64  --repos=http://mirrors.aliyun.com/centos/7.2.1511/cloud/x86_64/openstack-mitaka/ 
 </pre>
 * 修改ks.cfg文件
-<pre>
+    <pre>
 %post
 systemctl disable postfix.service
-
 $yum_config_stanza
 %end
 </pre>
 * 添加定时任务，定期同步repo
-<pre>
+    <pre>
 [root@linux-node1 ~]# echo "1 3 * * * /usr/bin/cobbler reposync --tries=3 --no-fail" >>/var/spool/cron/root
 </pre>
 
