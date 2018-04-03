@@ -5,7 +5,7 @@
 ### 场景二： ###
 当我们业务量逐渐变大，单台服务器负载过高，我们就要加机器用于分布式部署，但又限于money问题，我们只能添加一台，那么我们现在就有两台web服务器，tomcatA和tomcatB，那么问题来了，用户访问系统时，通过负载均衡，此用户访问了位于tomcatA上的应用，系统给此用户分配了一个session来标识用户身份，并返回sessionID给浏览器。这时user又向服务器发送请求，假设这时候负载均衡到了tomcatB，但是此时tomcatB上并没有存有user相应的session信息，根据一般应用的设置，会提示user重新登陆，试想一下user就这样一直登陆，一直提示未登录，那将是多么糟糕的事，这就是session保持的问题。
 # session保持的几种方法 #
-### 1.ip_hash:###
+### 1.ip_hash: ###
 该方法确保来自同一客户端的请求将始终传递到同一服务器，除非该服务器不可用。在后一种情况下，客户端请求将传递给另一台服务器，但是这种方法我们并不推荐使用原因如下:
 
 1) nginx不是最前端的服务器：
@@ -40,6 +40,6 @@ expires=time 设置浏览器保存cookie的时长，如果值为max,那么cookie
 domain=domain 定义设置cookie的域名
 
 path=path 定义设置cookie的路径
-### 场景三：###
+### 场景三： ###
 随着访问量的不断变大，两台web服务器已经不能够正常的提供访问，需要再部署多台web，可以使用redis这种缓存数据库来实现session的统一管理。
 ![](https://github.com/Hanzhiwei210521/loading/blob/master/image/image004.png)
