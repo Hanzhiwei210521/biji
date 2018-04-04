@@ -224,6 +224,7 @@ naxsi_extensivez _log
 Libinjection
 
 libinjection是一个第三方库（由clinet9开发），旨在通过标记化来检测SQL注入（sqli）和跨站点脚本（xss）。
+
 具体使用方法请参考: <https://github.com/nbs-system/naxsi/wiki/libinjection-integration>
 
 # location{}level 配置： #
