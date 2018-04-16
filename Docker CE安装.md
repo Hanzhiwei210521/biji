@@ -125,9 +125,79 @@ Docker CE支持64位版本CentOS 7,并且要求内核版本不低于3.10，CentO
 
 # 上面提到xfs的一个坑，下面我们来聊聊这个问题 #
 
+我们先看看xfs文件系统的机器装完docker是什么样：
+
+    [root@bogon ~]# docker info
+    Containers: 0
+     Running: 0
+     Paused: 0
+     Stopped: 0
+    Images: 0
+    Server Version: 18.04.0-ce
+    Storage Driver: devicemapper
+     Pool Name: docker-253:0-1027768-pool
+     Pool Blocksize: 65.54kB
+     Base Device Size: 10.74GB
+     Backing Filesystem: xfs
+     Udev Sync Supported: true
+     Data file: /dev/loop0
+     Metadata file: /dev/loop1
+     Data loop file: /var/lib/docker/devicemapper/devicemapper/data
+     Metadata loop file: /var/lib/docker/devicemapper/devicemapper/metadata
+     Data Space Used: 11.8MB
+     Data Space Total: 107.4GB
+     Data Space Available: 6.822GB
+     Metadata Space Used: 581.6kB
+     Metadata Space Total: 2.147GB
+     Metadata Space Available: 2.147GB
+     Thin Pool Minimum Free Space: 10.74GB
+     Deferred Removal Enabled: true
+     Deferred Deletion Enabled: true
+     Deferred Deleted Device Count: 0
+     Library Version: 1.02.140-RHEL7 (2017-05-03)
+    Logging Driver: json-file
+    Cgroup Driver: cgroupfs
+    Plugins:
+     Volume: local
+     Network: bridge host macvlan null overlay
+     Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog
+    Swarm: inactive
+    Runtimes: runc
+    Default Runtime: runc
+    Init Binary: docker-init
+    containerd version: 773c489c9c1b21a6d78b5c538cd395416ec50f88
+    runc version: 4fc53a81fb7c994640722ac585fa9ca548971871
+    init version: 949e6fa
+    Security Options:
+     seccomp
+      Profile: default
+    Kernel Version: 4.16.2-1.el7.elrepo.x86_64
+    Operating System: CentOS Linux 7 (Core)
+    OSType: linux
+    Architecture: x86_64
+    CPUs: 4
+    Total Memory: 7.79GiB
+    Name: nginx-realserver-1
+    ID: UKF4:M6T2:2QFU:WULC:WRR6:LRGE:QP5A:CMOT:T4ES:5Y6B:UPLM:E6UH
+    Docker Root Dir: /var/lib/docker
+    Debug Mode (client): false
+    Debug Mode (server): false
+    Registry: https://index.docker.io/v1/
+    Labels:
+    Experimental: false
+    Insecure Registries:
+     127.0.0.0/8
+    Live Restore Enabled: false
+
+    WARNING: devicemapper: usage of loopback devices is strongly discouraged for production use.
+         Use `--storage-opt dm.thinpooldev` to specify a custom block storage device.
+    WARNING: bridge-nf-call-iptables is disabled
+    WARNING: bridge-nf-call-ip6tables is disabled
+由docker info信息可以看到有一个devicemapper warning，但是从内核4.0+开始就默认使用overlay2驱动了，那这里为什么还会是devicemapper驱动呢，具体原因如下：
+
 Overlay和Overlay2是docker支持的两种存储驱动程序，它们都依赖于overlayfs文件系统。而在overlayfs代码中（它是Linux内核的一部分），用到了d\_tpye这个东东，d\_tpye信息被用来访问并用来确保某些文件操作被正确处理。overlayfs中有代码专门检查是否存在d\_type特征，并在底层文件系统中不存在时打印警告信息。在Overlay/Overlay2存储驱动程序上运行时，docker需要d_type功能才能正常工作。那这跟xfs有什么关系呢？
 
-对于某些文件系统，d\_type支持是可选的。 这包括Red Hat Enterprise Linux 7中的默认文件系统XFS，它是CentOS 7的上游基础。不幸的是，Red Hat / CentOS安装程序和mkfs.xfs命令都默认创建了XFS文件系统，但没有启用d\_type功能......一团糟！
+对于某些文件系统，d\_type支持是可选的。 这包括Red Hat Enterprise Linux 7中的默认文件系统XFS，它是CentOS 7的上游基础。不幸的是，Red Hat / CentOS安装程序和mkfs.xfs命令都默认创建了XFS文件系统，但没有启用d\_type功能......所以xfs系统的机器都不支持overlay2驱动，一团糟！
 
 作为一个快速规则，如果您使用的是RHEL 7或CentOS 7，并且默认情况下创建文件系统而不指定参数，则几乎可以100％确定文件系统上的d_type未打开。 要检查确定，请按照以下步骤操作。
 
@@ -135,16 +205,16 @@ Overlay和Overlay2是docker支持的两种存储驱动程序，它们都依赖�
 
 如果您是XFS文件系统，那么可以用xfs_info命令查看
     
-    [root@localhost ~]# xfs_info /
-    meta-data=/dev/sda3              isize=256    agcount=4, agsize=524224 blks
-             =                       sectsz=512   attr=2, projid32bit=1
-             =                       crc=0        finobt=0
-    data     =                       bsize=4096   blocks=2096896, imaxpct=25
-             =                       sunit=0      swidth=0 blks
-    naming   =version 2              bsize=4096   ascii-ci=0 ftype=0
-    log      =internal               bsize=4096   blocks=2560, version=2
-             =                       sectsz=512   sunit=0 blks, lazy-count=1
-    realtime =none                   extsz=4096   blocks=0, rtextents=0
+    [root@bogon ~]# xfs_info /
+    meta-data=/dev/mapper/centos-root              isize=256    agcount=4, agsize=524224 blks
+             =                                     sectsz=512   attr=2, projid32bit=1
+             =                                     crc=0        finobt=0
+    data     =                                     bsize=4096   blocks=2096896, imaxpct=25
+             =                                     sunit=0      swidth=0 blks
+    naming   =version 2                            bsize=4096   ascii-ci=0 ftype=0
+    log      =internal                             bsize=4096   blocks=2560, version=2
+             =                                     sectsz=512   sunit=0 blks, lazy-count=1
+    realtime =none                                 extsz=4096   blocks=0, rtextents=0
 
 注意到ftype=0没有，很不幸，0代表不支持。
 
@@ -166,11 +236,13 @@ Overlay和Overlay2是docker支持的两种存储驱动程序，它们都依赖�
 
     mkfs.xfs -n ftype=1 /path/to/your/device
 
-不幸的是重新创建文件系统，要先umount设备，否则无法创建，但是，如果系统和数据在一个盘，umount后，就会发现找不见原先的设备了，真是一个悲剧。
+不幸的是重新创建文件系统，要先umount设备，否则无法创建，而docker又是装在系统盘，如果你将系统盘umount掉，那就呵呵了，有一个办法就是将docker的工作目录和存储目录都移除系统盘。
 
 
  文章参考： 
 
 <https://docs.docker.com/install/linux/docker-ce/centos/#upgrade-docker-ce>   
+
 <https://yeasy.gitbooks.io/docker_practice/content/install/mirror.html>
+
 <https://linuxer.pro/2017/03/what-is-d_type-and-why-docker-overlayfs-need-it/>
