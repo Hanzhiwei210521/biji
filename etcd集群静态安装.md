@@ -31,7 +31,7 @@ ETCD下载：<https://github.com/coreos/etcd/releases/download/v3.2.18/etcd-v3.2
     mkdir /etc/etcd
 节点一配置：
 
-    cat /etc/etcd/conf.ym
+    cat /etc/etcd/conf.yml
     name: etcd-1  
     data-dir: /opt/etcd/data  
     listen-client-urls: http://192.168.6.13:2379 
@@ -43,7 +43,7 @@ ETCD下载：<https://github.com/coreos/etcd/releases/download/v3.2.18/etcd-v3.2
     initial-cluster-state: new 
 节点二配置：
 
-    cat /etc/etcd/conf.ym
+    cat /etc/etcd/conf.yml
     name: etcd-2  
     data-dir: /opt/etcd/data  
     listen-client-urls: http://192.168.6.14:2379 
@@ -55,7 +55,7 @@ ETCD下载：<https://github.com/coreos/etcd/releases/download/v3.2.18/etcd-v3.2
     initial-cluster-state: new 
 节点三配置：
 
-    cat /etc/etcd/conf.ym
+    cat /etc/etcd/conf.yml
     name: etcd-3 
     data-dir: /opt/etcd/data  
     listen-client-urls: http://192.168.0.77:2379 
