@@ -120,7 +120,7 @@ flannel服务启动是主要做了一下几部工作：
     [Install]
     WantedBy=multi-user.target
 
-###　重新启动docker　###
+### 重新启动docker ###
 
     systemctl daemon-reload
     systemctl restart docker 
