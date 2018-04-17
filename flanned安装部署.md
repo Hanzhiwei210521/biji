@@ -119,7 +119,9 @@ flannel服务启动是主要做了一下几部工作：
 
     [Install]
     WantedBy=multi-user.target
+
 ###　重新启动docker　###
+
     systemctl daemon-reload
     systemctl restart docker 
 查看docker进程
@@ -129,7 +131,7 @@ flannel服务启动是主要做了一下几部工作：
     root     11868 11861  0 14:57 ?        00:00:13 docker-containerd --config /var/run/docker/containerd/containerd.toml
 需要注意的是docker启动参数中--bip=172.17.41/24这个参数，flannel的作用就是修改了这个参数相当于为每台node主机的docker划分了子网。
 
-我么可以在etcd中查看flannel设置的flannel0地址与物理机IP的对应规则
+我们可以在etcd中查看flannel设置的flannel0地址与物理机IP的对应规则
 
     [root@k8s-node2 ~]# etcdctl --endpoints=http://192.168.6.2:2379 ls /jxdd/network/subnets
     /jxdd/network/subnets/172.17.41.0-24
