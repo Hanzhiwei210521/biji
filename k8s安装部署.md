@@ -1,4 +1,4 @@
-# k8s安装部署 *
+# k8s安装部署 #
 
 k8s1.9下载地址：<https://v1-9.docs.kubernetes.io/docs/imported/release/notes/>
 
@@ -7,7 +7,7 @@ k8s1.9下载地址：<https://v1-9.docs.kubernetes.io/docs/imported/release/note
 * kubernetes-server-linux-amd64.tar.gz
 * kubernetes-node-linux-amd64.tar.gz
 
-### 环境准备：###
+### 环境准备 ###
 * 192.168.6.15 k8s-master
 * 192.168.6.5 k8s-node1
 * 192.168.6.2 k8s-node2
@@ -180,7 +180,7 @@ k8s node部署方式同master，node节点主要运行kubelet和kube-proxy
 k8s node2部署同上，三台机器依次配置环境变量：
 
     [root@k8s-master ~]# echo "PATH=$PATH:/opt/kubernetes/bin/" >>/etc/profile
-    [root@k8s-master ~]# sort /etc/profile
+    [root@k8s-master ~]# source /etc/profile
 
 k8s master查看node节点：
  
