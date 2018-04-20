@@ -4,7 +4,20 @@ k8s部署完成后，使用deployment分别在两个node上部署一个容器，
 
 ![](https://github.com/Hanzhiwei210521/loading/blob/master/image/image009.png)
 
-原因为数据包到目的主机的flannel0后没有发送到docker0上，主要是由于forward chain中Action为DOCKE的规则阻断了数据包进入docker0，ping不通时候的iptables类似如下：
+原因为数据包到目的主机的flannel0后没有发送到docker0上，主要是由于forward chain中Action为DOCKE的规则阻断了数据包进入docker0。
+
+有一个问题值得思考，我系统是mini安装，默认没有安装iptables和firewalld,docker是怎么怎么实现的这些规则，百思不得姐！
+
+先安装iptables
+
+    [root@k8s-node2 ~]# yum install iptables-services
+启动iptables加入开机自启，并重启docker
+
+    [root@k8s-node2 ~]# systemctl start iptables
+    [root@k8s-node2 ~]# systemctl enable iptables
+    [root@k8s-node2 ~]# systemctl restart docker
+
+查看iptables规则：
 
     [root@k8s-node2 ~]# iptables -nL -v
     Chain INPUT (policy ACCEPT 0 packets, 0 bytes)
@@ -75,7 +88,7 @@ k8s部署完成后，使用deployment分别在两个node上部署一个容器，
         0     0 ACCEPT     all  --  docker0 docker0  0.0.0.0/0            0.0.0.0/0           
        24  1728 KUBE-FORWARD  all  --  *      *       0.0.0.0/0            0.0.0.0/0            /* kubernetes forward rules */
        24  1728 REJECT     all  --  *      *       0.0.0.0/0            0.0.0.0/0            reject-with icmp-host-prohibited
-然后容器就可以互通了。
+
 
 强制在机器启动时在forward链中增加一条转发规则：
 
@@ -90,7 +103,7 @@ k8s部署完成后，使用deployment分别在两个node上部署一个容器，
     [root@k8s-node2 ~]# cat /usr/lib/systemd/system/add-iptable-rule.service 
     [Unit]
     Description=enable forward all for forward chain in filter table
-    After=network.target
+    After=docker.service
     [Service]
     ExecStart=/bin/bash /etc/sysconfig/add-forward-iptable-rule.sh
     [Install]
@@ -99,5 +112,15 @@ k8s部署完成后，使用deployment分别在两个node上部署一个容器，
 
     [root@k8s-node2 sysconfig]# systemctl enable add-iptable-rule.service 
     Created symlink from /etc/systemd/system/multi-user.target.wants/add-iptable-rule.serv
+到这里，你以为万事大吉了，oh,no,no,no，到这里，问题并没有解决，而是变得更复杂了，现在node1节点上的容器和node2节点上的容器，单向ping不同，只有容器1ping容器2,然后容器2同时ping容器1才通，只要通了这一次，在一定时间内（大概一两分钟），单向ping是可以的，过了这个时间，单向ping依然不通，双方同时ping依然可以，而且，双方的docker0网桥一直处于无法ping通状态。问题解决，原来是iptables把flannel的端口封掉了，添加iptables允许flannel端口即可。
 
-文章摘自： <https://www.myf5.net/post/2304.htm>
+     [root@k8s-node2 ~]# cat /etc/sysconfig/add-forward-iptable-rule.sh 
+     #!/bin/bash
+     sleep 10
+     iptables -I INPUT -p tcp --dport 2379 -j ACCEPT
+     iptables -I INPUT -p tcp --dport 2380 -j ACCEPT
+     iptables -I INPUT -p udp --dport 8285 -j ACCEPT
+     iptables -I FORWARD -s 0.0.0.0/0 -d 0.0.0.0/0 ! -i docker0 -o docker0 -j ACCEPT
+端口2379和2380是etcd端口，8285是flannel UDP协议端口，VxLan使用8472端口，这里使用的是UDP协议。
+
+文章参考： <https://www.myf5.net/post/2304.htm>
