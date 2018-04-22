@@ -49,7 +49,7 @@ k8s集群部署完，我们在master尝试启动一个容器试试
       Warning  FailedCreatePodSandBox  0s (x24 over 10m)  kubelet, 192.168.6.5  Failed create pod sandbox.
 返现最后有一个Failed create pod sandbox ,原因为kubelet在创建pod时会先下载一个pause镜像，这个镜像用于容器基础网络管理，但是这个镜像仓库（gcr.io/google_containers/pause-amd64:3.0）是国外的，不能顺利下载。
 
-####　解决办法　####
+#### 解决办法 ####
 
 1、在每个node节点手动下载（用国内的源），然后打一个tag
 
