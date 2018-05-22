@@ -71,13 +71,13 @@ ETCD下载：<https://github.com/coreos/etcd/releases/download/v3.2.18/etcd-v3.2
     /usr/bin/etcd --config-file=/etc/etcd/conf.yml
 查看集群列表：
  
-    [root@kub-master ~]# /usr/bin/etcdctl --endpoints "http://192.168.6.13:2379 " member list
+    [root@kub-master ~]# /usr/bin/etcdctl --endpoints "http://192.168.6.13:2379" member list
     4861972b3d540ea5: name=etcd-1 peerURLs=http://192.168.6.13:2380 clientURLs=http://192.168.6.13:2379  isLeader=false
     54fcb2edbfd0604e: name=etcd-2 peerURLs=http://192.168.6.14:2380 clientURLs=http://192.168.6.14:2379 isLeader=false
     fe81c1aadc444d79: name=etcd-3 peerURLs=http://192.168.0.77:2380 clientURLs=http://192.168.0.77:2379 isLeader=true
 查看集群健康状态：
 
-    [root@bogon ~]# /usr/bin/etcdctl --endpoints "http://192.168.0.77:2379 " cluster-health
+    [root@bogon ~]# /usr/bin/etcdctl --endpoints "http://192.168.0.77:2379" cluster-health
     member 4861972b3d540ea5 is healthy: got healthy result from http://192.168.6.13:2379 
     member 54fcb2edbfd0604e is healthy: got healthy result from http://192.168.6.14:2379 
     member fe81c1aadc444d79 is healthy: got healthy result from http://192.168.0.77:2379 
