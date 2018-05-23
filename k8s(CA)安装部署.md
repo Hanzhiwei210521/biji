@@ -242,7 +242,6 @@ node部署
     [root@k8s-node1 src]# cd kubernetes
     [root@k8s-node1 kubernetes]# cp node/bin/{kube-proxy,kubelet} /opt/kubernetes/bin/ 
     #上传kubelet.sh等脚本
-    kubernetes-src.tar.gz  LICENSES  node
     [root@k8s-node1 kubernetes]# ls
     kubelet.sh  kubernetes-src.tar.gz  LICENSES  node  proxy.sh
     [root@k8s-node1 kubernetes]# chmod +x *.sh
