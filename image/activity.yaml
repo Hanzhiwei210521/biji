@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1 
+kind: Deployment 
+metadata: 
+  name: activity-deploy
+spec: 
+  replicas: 2
+  template: 
+    metadata: 
+      labels: 
+        app: activity
+    spec: 
+      containers: 
+      - name: activity
+        image: harbor.jinxiudadi.com/jxdd/activity:v2
+        imagePullPolicy: IfNotPresent
+        ports: 
+          - containerPort: 8080
+        volumeMounts:
+        - mountPath: /var/log/
+          name: app-logs
+      - name: filebeat
+        image: harbor.jinxiudadi.com/jxdd/filebeat:6.14
+        args: [
+          "-c", "/usr/share/filebeat/filebeat.yml",
+          "-e",
+        ]
+        volumeMounts:
+        - name: filebeat-config
+          mountPath: /usr/share/filebeat/filebeat.yml
+          subPath: filebeat.yml
+        - name: app-logs
+          mountPath: /app-log
+      imagePullSecrets:
+        - name: registry-secret
+      volumes:
+      - name: app-logs
+        emptyDir: {}
+      - name: filebeat-config
+        configMap:
+          name: filebeat-config

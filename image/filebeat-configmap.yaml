@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+data:
+  filebeat.yml: |-
+    filebeat.prospectors:
+      - type: log
+        paths:
+          - /data/log/redis/*.log
+        tags: ["redis"]
+        fields_under_root: true
+
+      - type: log
+        paths:
+          - /app-log/*.log
+        multiline:
+          pattern: '^\d+-\d+-\d+ \d+:\d+:\d+'
+          negate: true
+          match: after
+        tags: ["service"]
+        fields_under_root: true
+    output.redis:
+      hosts: "192.168.6.9"
+      db: "2"
+      port: "6379"
+      key: "service.log"
+
