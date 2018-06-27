@@ -308,6 +308,8 @@ logstash.conf
     }
 
 
+elk dashboard
+
 ![](https://github.com/Hanzhiwei210521/loading/blob/master/image/QQ%E5%9B%BE%E7%89%8720180627155110.png)
 
 在线gork正则的地址: <https://grokdebug.herokuapp.com/>
