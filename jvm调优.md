@@ -169,9 +169,9 @@ jinfo(JVM Configuration info)这个命令作用是实时查看和调整虚拟机
                   total        used        free      shared  buff/cache   available
     Mem:         128656        4025      104331        4185       20298      119617
  
-对比以上三个命令输出，我们会发现以上数据跟默认设置完全吻合，，初始堆内存为物理内存的1/64,年轻代：老年代=1：2，也就是说JVM没有任何优化，有没有很可怕。。。。
+对比以上三个命令输出，我们会发现以上数据跟默认设置完全吻合，，初始堆内存为物理内存的1/64,年轻代：老年代=1：2，也就是说JVM没有任何优化。所谓存在即合理，JVM默认值也可以跑的很好，只是有时我们需要结合自己的业务进行优化，那如何进行优化呢，主要是根据GC频率和GC时间取一个折中值。
 
-Java程序运行一段时间后，我们会发现Eden和Survivor的空间会小于初始值，这就很让人费解了，我看看个例子如下（还是刚才的测试机）：
+Java程序运行一段时间后，我们会发现Eden和Survivor的空间会小于初始值，这就很让人费解了，我们看个例子如下（还是刚才的测试机）：
 
     From Space:
        capacity = 29884416 (28.5MB)
@@ -277,10 +277,22 @@ Minor GC达到了686763次，耗时2883.992s;Full GC也达到了22437次，耗�
 
 ## JVM调优 ##
 
-* JAVA_OPTS="$JAVA_OPTS -server -XX:+DisableExplicitGC -XX:-UseAdaptiveSizePolicy -XX:-OmitStackTraceInFastThrow -XX:+UseGCLogFileRotation"
-* JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCApplicationStoppedTime -XX:GCLogFileSize=10M -XX:NumberOfGCLogFiles=20 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$CATALINA_BASE/logs/debug/dump -Xloggc:$CATALINA_BASE/logs/debug/heap_trace.txt"
-* JAVA_OPTS="$JAVA_OPTS -Xms4096M -Xmx4096M -Xss512k -XX:NewRatio=1 -XX:SurvivorRatio=8 -XX:MaxTenuringThreshold=6"
-* JAVA_OPTS="$JAVA_OPTS -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly"
+活跃数据的大小是指，应用程序稳定运行时长期存活对象在堆中占用的空间大小，也就是Full GC后堆中老年代占用空间的大小。可以通过GC日志中Full GC之后老年代数据大小得出，比较准确的方法是在程序稳定后，多次获取GC数据，通过取平均值的方式计算活跃数据的大小。活跃数据和各分区之间的比例关系如下：
+空间 	倍数
+总大小 	3-4 倍活跃数据的大小
+新生代 	1-1.5 活跃数据的大小
+老年代 	2-3 倍活跃数据的大小
+永久代 	1.2-1.5 倍Full GC后的永久代空间占用
+
+例如，根据GC日志获得老年代的活跃数据大小为300M，那么各分区大小可以设为：
+
+    总堆：1200MB = 300MB × 4
+    新生代：450MB = 300MB × 1.5
+    老年代： 750MB = 1200MB - 450MB*
+
+这部分设置仅仅是堆大小的初始值，后面的优化中，可能会调整这些值，具体情况取决于应用程序的特性和需求。
+
+JVM可以参考美团点评网：<https://tech.meituan.com/jvm_optimize.html>
    
 参考： 
 
